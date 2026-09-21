@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Portal CBT - Ujian Sumatif Kimia XI 2026</title>
+  
+  <!-- Font Kaligrafi Dancing Script & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #7c3aed;        /* Violet Laboratorium */
+      --primary-hover: #6d28d9;
+      --accent: #06b6d4;         /* Cyan Larutan Kimia */
+      --bg-canvas: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Kunci seleksi teks di dashboard/modal agar tidak terganggu saat klik */
+    .overlay, header, .card-footer-signature, button {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    input {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* === BACKGROUND CERAH KIMIA === */
+    .bg-mesh {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 12% 15%, rgba(221, 214, 254, 0.5) 0%, transparent 45%),
+        radial-gradient(circle at 88% 85%, rgba(207, 250, 254, 0.55) 0%, transparent 45%),
+        #f8fafc;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* === OVERLAY MODAL === */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 9999;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      overflow-y: auto;
+    }
+
+    .card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 26px 22px 18px 22px;
+      border-radius: 22px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 45px -10px rgba(124, 58, 237, 0.12);
+      z-index: 10;
+    }
+
+    /* Badge Ikon Labu Erlenmeyer */
+    .chemistry-badge {
+      width: 74px;
+      height: 74px;
+      margin: 0 auto 12px auto;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 16px -4px rgba(124, 58, 237, 0.18);
+    }
+
+    .chemistry-svg {
+      width: 46px;
+      height: 46px;
+    }
+
+    /* Animasi Gelembung Reaksi */
+    @keyframes bubbleUp {
+      0% { transform: translateY(0) scale(0.8); opacity: 0; }
+      50% { opacity: 0.9; }
+      100% { transform: translateY(-16px) scale(1.1); opacity: 0; }
+    }
+
+    .bubble-1 { animation: bubbleUp 2s ease-in-out infinite; }
+    .bubble-2 { animation: bubbleUp 2.4s ease-in-out 0.8s infinite; }
+
+    .sub-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f3e8ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 20px;
+      color: #6b21a8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .card p.subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .info-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .info-box span.label {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .info-box span.value {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Rules List */
+    .rules-list {
+      background: #fff1f2;
+      border: 1px dashed #fecdd3;
+      border-radius: 12px;
+      padding: 11px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .rules-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.76rem;
+      color: #be123c;
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .rules-item:last-child { margin-bottom: 0; }
+
+    /* Tombol */
+    .btn-glow {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.35);
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-glow:active { transform: scale(0.98); }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.35);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    /* Catatan Kaki Kaligrafi */
+    .card-footer-signature {
+      margin-top: 14px;
+      text-align: right;
+      padding-right: 2px;
+    }
+
+    .signature-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #334155;
+      letter-spacing: 0.5px;
+    }
+
+    /* Input Token */
+    .token-box {
+      margin: 16px 0;
+      text-align: left;
+    }
+
+    .token-box label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .token-box input {
+      width: 100%;
+      padding: 13px;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      color: #0f172a;
+      text-align: center;
+      letter-spacing: 3px;
+      font-weight: 800;
+      text-transform: uppercase;
+      outline: none;
+    }
+
+    .token-box input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.8rem;
+      margin-top: 6px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Header Ujian Aktif */
+    header {
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exam-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .violation-badge {
+      font-size: 0.7rem;
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #6d28d9;
+      letter-spacing: 1px;
+    }
+
+    .timer-warning {
+      background: #ef4444;
+      border-color: #dc2626;
+      color: #ffffff;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 1; }
+      to { opacity: 0.65; }
+    }
+
+    /* Area Formulir (Touch-Scroll Bebas Macet di Layar HP) */
+    .form-container {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: calc(100% - 60px);
+      background: #ffffff;
+      z-index: 10;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      touch-action: pan-y !important;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-mesh"></div>
+  <div class="bg-grid"></div>
+
+  <!-- 1. Beranda Ujian / Start Screen -->
+  <div id="startScreen" class="overlay">
+    <div class="card">
+      
+      <!-- Ikon Labu Erlenmeyer Kimia -->
+      <div class="chemistry-badge">
+        <svg class="chemistry-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="27" y="10" width="10" height="4" rx="2" fill="#7c3aed" />
+          <path d="M29 14V24L16 48C14.5 51 16.5 54 20 54H44C47.5 54 49.5 51 48 48L35 24V14H29Z" stroke="#7c3aed" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M20 48L24.5 40C28 41.5 36 38.5 39.5 40L44 48C45 50 43.5 52 41 52H23C20.5 52 19 50 20 48Z" fill="#a78bfa" fill-opacity="0.6"/>
+          <path d="M20 48C24 49 28 47 32 48C36 49 40 47 44 48" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/>
+          <circle class="bubble-1" cx="28" cy="38" r="2.5" fill="#06b6d4" />
+          <circle class="bubble-2" cx="36" cy="34" r="2" fill="#7c3aed" />
+        </svg>
+      </div>
+
+      <span class="sub-badge">Evaluasi Pembelajaran</span>
+      <h1>SUMATIF KIMIA KELAS XI</h1>
+      <p class="subtitle">Analisis konsep kimia dengan teliti, hitung stoikiometri, dan utamakan integritas.</p>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <span class="label">MATA PELAJARAN</span>
+          <span class="value">🧪 Kimia Kelas XI</span>
+        </div>
+        <div class="info-box">
+          <span class="label">DURASI WAKTU</span>
+          <span class="value">⏱️ 90 Menit</span>
+        </div>
+        <div class="info-box">
+          <span class="label">SISTEM UJIAN</span>
+          <span class="value">🔒 Terkunci (Kiosk)</span>
+        </div>
+        <div class="info-box">
+          <span class="label">MAKS. PERINGATAN</span>
+          <span class="value">⚠️ 3x Toleransi</span>
+        </div>
+      </div>
+
+      <div class="rules-list">
+        <div class="rules-item">
+          <span>•</span>
+          <span>Layar otomatis beralih ke <b>Mode Layar Penuh</b>.</span>
+        </div>
+        <div class="rules-item">
+          <span>•</span>
+          <span>Dilarang beralih tab, membalas chat, atau keluar browser.</span>
+        </div>
+        <div class="rules-item">
+          <span>•</span>
+          <span>Jika melanggar 3x, <b>perangkat terkunci permanen</b> dan tidak bisa dibuka kembali.</span>
+        </div>
+      </div>
+
+      <button class="btn-glow" onclick="startExam()">
+        <span>Mulai Ujian Kimia XI</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+
+      <div class="card-footer-signature">
+        <span class="signature-text">By.Pk Guru Iskandar-TimItSmanbatPan</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Modal Peringatan Sementara (1x & 2x Pelanggaran) -->
+  <div id="warningModal" class="overlay hidden">
+    <div class="card" style="border-color: #fca5a5;">
+      <div style="font-size: 2.2rem; margin-bottom: 6px;">⚠️</div>
+      <h1 style="color: #dc2626; font-size: 1.25rem;">UJIAN TERKUNCI!</h1>
+      <p id="warningText" class="subtitle" style="margin-top: 6px; color: #475569;">Terdeteksi meninggalkan halaman ujian.</p>
+      
+      <div class="token-box">
+        <label for="inputToken">MASUKKAN TOKEN PENGAWAS:</label>
+        <input type="text" id="inputToken" placeholder="••••••••••••" autocomplete="off">
+        <p id="tokenError" class="error-msg hidden">Token salah! Silakan panggil pengawas.</p>
+      </div>
+
+      <button class="btn-glow btn-danger" onclick="unlockExam()">Buka Kunci Layar</button>
+    </div>
+  </div>
+
+  <!-- 3. Modal KUNCI PERMANEN PERANGKAT (Auto-Block) -->
+  <div id="lockScreen" class="overlay hidden">
+    <div class="card" style="border-color: #fca5a5;">
+      <div style="font-size: 2.5rem; margin-bottom: 6px;">🛑</div>
+      <h1 style="color: #dc2626; font-size: 1.3rem;">PERANGKAT DIKUNCI</h1>
+      <p id="lockMessage" class="subtitle" style="margin-top: 8px; font-weight: 600; color: #334155;">
+        Akses ujian di perangkat ini telah dihentikan secara permanen oleh sistem.
+      </p>
+      <p style="font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+        Membuka kembali link ini tidak akan membuka ujian. Silakan lapor langsung kepada pengawas di ruangan.
+      </p>
+
+      <!-- Panel Khusus Pengawas untuk Buka Kunci Perangkat -->
+      <div id="proctorResetBox" class="hidden" style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+        <input type="text" id="resetTokenInput" placeholder="TOKEN PENGAWAS" style="width:100%; padding:8px; text-align:center; font-weight:bold; margin-bottom:6px; text-transform:uppercase;">
+        <button class="btn-glow" style="padding:10px; font-size:0.85rem;" onclick="resetDeviceLock()">Reset Kunci Perangkat</button>
+        <p id="resetError" class="error-msg hidden">Token salah!</p>
+      </div>
+
+      <button class="btn-secondary" onclick="toggleProctorReset()">Opsi Pengawas</button>
+    </div>
+  </div>
+
+  <!-- 4. Header Ujian Aktif -->
+  <header>
+    <div class="header-info">
+      <!-- Mini Flask Icon -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 2v7.31L4.66 18.25A2 2 0 0 0 6.38 21h11.24a2 2 0 0 0 1.72-2.75L14 9.31V2"></path>
+        <path d="M8.5 2h7"></path>
+        <path d="M7 16h10"></path>
+      </svg>
+      <div class="header-titles">
+        <span class="exam-title">Sumatif Kimia Kelas XI</span>
+        <span class="violation-badge" id="violationText">Pelanggaran: 0/3</span>
+      </div>
+    </div>
+    <!-- Timer Header 90 Menit -->
+    <div class="timer-badge" id="timer">90:00</div>
+  </header>
+
+  <!-- Area Google Form Resmi Sumatif Kimia Kelas XI -->
+  <div class="form-container" id="frameContainer">
+    <!-- Iframe dimuat dinamis via JavaScript jika perangkat belum terkunci -->
+  </div>
+
+  <script>
+    // === KONFIGURASI SISTEM UJIAN ===
+    const EXAM_ID = "SUMATIF_KIMIA_XI_2026"; // ID unik ujian Kimia XI
+    const PROCTOR_TOKEN = "SUMATIFKIMIAXI2026"; // Token Pengawas
+    
+    // Tautan Resmi Google Form Kimia XI dengan parameter embedded:
+    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScjpoTk3PH5goRdZEWu_0F07gBQWvjBqVGeNJ8xRWmAZEzaRw/viewform?embedded=true";
+    
+    // Durasi Waktu 90 Menit:
+    let examDurationMinutes = 90;
+    const maxViolations = 3;
+
+    let timeRemaining = examDurationMinutes * 60;
+    let violationCount = 0;
+    let timerInterval = null;
+    let isExamActive = false;
+
+    // Elemen DOM
+    const startScreen = document.getElementById('startScreen');
+    const warningModal = document.getElementById('warningModal');
+    const lockScreen = document.getElementById('lockScreen');
+    const lockMessage = document.getElementById('lockMessage');
+    const timerDisplay = document.getElementById('timer');
+    const violationText = document.getElementById('violationText');
+    const warningText = document.getElementById('warningText');
+    const inputToken = document.getElementById('inputToken');
+    const tokenError = document.getElementById('tokenError');
+    const frameContainer = document.getElementById('frameContainer');
+
+    // ==========================================
+    // 1. CEK STATUS KUNCI PERANGKAT (LOCAL STORAGE)
+    // ==========================================
+    function checkDeviceLock() {
+      const lockData = localStorage.getItem("CBT_LOCK_" + EXAM_ID);
+      if (lockData) {
+        const parsed = JSON.parse(lockData);
+        showPermanentLockScreen(parsed.reason || "Perangkat Anda telah terkunci secara permanen.");
+        return true;
+      }
+      return false;
+    }
+
+    // Jalankan pemeriksaan awal sebelum formulir dimuat
+    if (!checkDeviceLock()) {
+      frameContainer.innerHTML = `
+        <iframe 
+          id="examFrame" 
+          src="${FORM_URL}"
+          frameborder="0" 
+          marginheight="0" 
+          marginwidth="0"
+          scrolling="yes">
+          Memuat formulir Sumatif Kimia Kelas XI...
+        </iframe>
+      `;
+    }
+
+    // ==========================================
+    // 2. EKSEKUSI KUNCI PERANGKAT PERMANEN
+    // ==========================================
+    function lockDevicePermanently(reason) {
+      isExamActive = false;
+      clearInterval(timerInterval);
+
+      // Simpan status kunci permanen di memori HP murid
+      localStorage.setItem("CBT_LOCK_" + EXAM_ID, JSON.stringify({
+        locked: true,
+        reason: reason,
+        timestamp: new Date().toISOString()
+      }));
+
+      // Bersihkan formulir dari layar
+      frameContainer.innerHTML = "";
+      showPermanentLockScreen(reason);
+    }
+
+    function showPermanentLockScreen(message) {
+      startScreen.classList.add('hidden');
+      warningModal.classList.add('hidden');
+      lockMessage.textContent = message;
+      lockScreen.classList.remove('hidden');
+
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // ==========================================
+    // 3. RESET KUNCI PERANGKAT OLEH PENGAWAS
+    // ==========================================
+    function toggleProctorReset() {
+      const box = document.getElementById('proctorResetBox');
+      box.classList.toggle('hidden');
+    }
+
+    function resetDeviceLock() {
+      const input = document.getElementById('resetTokenInput').value.trim().toUpperCase();
+      const err = document.getElementById('resetError');
+      
+      if (input === PROCTOR_TOKEN) {
+        // Hapus status kunci dari storage HP murid
+        localStorage.removeItem("CBT_LOCK_" + EXAM_ID);
+        alert("Kunci perangkat berhasil dibuka oleh pengawas. Halaman akan dimuat ulang.");
+        location.reload();
+      } else {
+        err.classList.remove('hidden');
+      }
+    }
+
+    // ==========================================
+    // 4. ALUR UJIAN AKTIF
+    // ==========================================
+    function startExam() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen().catch(() => {});
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      }
+
+      startScreen.classList.add('hidden');
+      isExamActive = true;
+      startTimer();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          lockDevicePermanently("Waktu pengerjaan ujian telah berakhir!");
+          return;
+        }
+
+        timeRemaining--;
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (timeRemaining <= 300) {
+          timerDisplay.classList.add('timer-warning');
+        }
+      }, 1000);
+    }
+
+    function recordViolation(reason) {
+      if (!isExamActive) return;
+
+      violationCount++;
+      violationText.textContent = `Pelanggaran: ${violationCount}/${maxViolations}`;
+
+      if (violationCount >= maxViolations) {
+        lockDevicePermanently(`Akses Dihentikan! Anda telah mencapai batas toleransi (${maxViolations}x) pelanggaran.`);
+      } else {
+        warningText.innerHTML = `Terdeteksi: <b>${reason}</b>.<br><br>Pelanggaran ke-<b>${violationCount}</b> dari ${maxViolations}. Panggil pengawas untuk membuka kunci kembali.`;
+        inputToken.value = "";
+        tokenError.classList.add('hidden');
+        warningModal.classList.remove('hidden');
+      }
+    }
+
+    function unlockExam() {
+      const enteredToken = inputToken.value.trim().toUpperCase();
+      if (enteredToken === PROCTOR_TOKEN) {
+        tokenError.classList.add('hidden');
+        warningModal.classList.add('hidden');
+
+        const docEl = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => {});
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
+        }
+      } else {
+        tokenError.classList.remove('hidden');
+        inputToken.value = "";
+        inputToken.focus();
+      }
+    }
+
+    // ==========================================
+    // 5. DETEKSI CURANG (EVENT LISTENERS)
+    // ==========================================
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && isExamActive) {
+        recordViolation("Membuka aplikasi lain atau berganti layar");
+      }
+    });
+
+    document.addEventListener('fullscreenchange', handleFullscreenExit);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenExit);
+
+    function handleFullscreenExit() {
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFullscreen && isExamActive && warningModal.classList.contains('hidden')) {
+        recordViolation("Menutup mode layar penuh");
+      }
+    }
+
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+  </script>
+</body>
+</html>
